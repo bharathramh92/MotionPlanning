@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Introduction &mdash; MotionPlanning 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MotionPlanning 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="Code Description" href="code.html" />
+    <link rel="prev" title="Welcome to MotionPlanning’s documentation!" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="code.html" title="Code Description"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to MotionPlanning’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MotionPlanning 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Motion planning also called piano mover&#8217;s problem, is a method for discretizing the movements controls and satisfy movement constraints for an autonomous robot. One example would be for a robot to find a path to move along a building which has obstacles. This is a PSPACE-hard problem.</p>
+<p>This project aims to solve a problem involving a Car like robot (Reeds Shepp Car) to move around in a known environment. Algorithm used to solve this problem is <a class="reference external" href="http://acl.mit.edu/papers/Luders13_GNC.pdf">RRT* algorithm</a> for non-holonomic robots. Here, if go close to the goal position, it is considered as success.</p>
+<div class="section" id="reedsshepp-car">
+<h2>ReedsShepp Car<a class="headerlink" href="#reedsshepp-car" title="Permalink to this headline">¶</a></h2>
+<p>Car is a single rigid body object.</p>
+<p>Following are differential constraints for our non-holonomic car.</p>
+<div class="math">
+\[\begin{split} \begin{eqnarray}
+\frac{\partial x}{\partial t}
+= U_s * \cos \theta  \\
+\frac{\partial y}{\partial t}
+= U_s * \sin \theta  \\
+\frac{\partial \theta}{\partial t}
+= U_s/L * \tan U_\phi
+ \end{eqnarray}\end{split}\]</div>
+<dl class="docutils">
+<dt>Where,</dt>
+<dd><ul class="first last simple">
+<li><span class="math">\(U_s\)</span>: Linear velocity</li>
+<li><span class="math">\(U_\phi\)</span>: Maximum possible Angle between front wheel and axis along the car length.</li>
+<li>L: Linear velocity</li>
+</ul>
+</dd>
+</dl>
+</div>
+<div class="section" id="collision-detection">
+<h2>Collision Detection<a class="headerlink" href="#collision-detection" title="Permalink to this headline">¶</a></h2>
+<p>Since we are considering a 2D world with polygonal obstacles, it is feasible to use shape library to perform geometric computations. Collision detection is done using <a class="reference external" href="http://toblerity.org/shapely/manual.html">shapely</a> library.</p>
+</div>
+<div class="section" id="strategies-used">
+<h2>Strategies used<a class="headerlink" href="#strategies-used" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>The format of robot/car and transforming them to get a set of vertices for a new config is explained in <a class="reference internal" href="code.html#Config.Environment._change_axis" title="Config.Environment._change_axis"><code class="xref py py-meth docutils literal"><span class="pre">Config.Environment._change_axis()</span></code></a>.</li>
+<li>To optimize computation while integrating, each object generates all of its possible motions to by integration and caches the result. Upon requesting the steer method, the minimum is computed from the pre-cached data.</li>
+<li>Static variable called data is used in ReedsShepp class since the car data/specifications won&#8217;t change over the course of running a program.</li>
+<li>All the angles are taken in the range [-<span class="math">\(\pi\)</span>  <span class="math">\(\pi\)</span>]. While storing and angle, it is rotated based on <a class="reference internal" href="code.html#ReedsSheppCar.ReedsShepp._roll_over" title="ReedsSheppCar.ReedsShepp._roll_over"><code class="xref py py-meth docutils literal"><span class="pre">ReedsSheppCar.ReedsShepp._roll_over()</span></code></a> method. Also in distance function, to make sure same behaviour while comparing a positive angle and negative angle, all angles are converted in [0  2:math:<cite>pi</cite>].</li>
+<li>If the path is &#8216;s&#8217; or &#8216;b&#8217; or &#8216;f&#8217;, then only the starting and end points of the line segment is tracked, otherwise for drawing the curve, the points are discretized based on geom_skip_factor value. This is to ensure memory optimization at the cost of final graph plot legibility.</li>
+<li>The output is stored as JSON file which can be read quickly and be plotted.</li>
+<li>Tolerance concept and weighted knn ensures a better convergence though at a cost of error.</li>
+</ul>
+</div>
+<div class="section" id="sample-output">
+<h2>Sample Output<a class="headerlink" href="#sample-output" title="Permalink to this headline">¶</a></h2>
+<p>Following are the meta information about the figures.</p>
+<ul class="simple">
+<li>Blue dot at (45, 45) is the center of rear axle. The rectangle bounding the point is the car.</li>
+<li>Green triangle at (480, 50) is the goal position.</li>
+<li>Green lines/curves are the tree.</li>
+<li>Red lines/curves are the path which the car needs to follow.</li>
+<li>Remaining rectangles are obstacles.</li>
+</ul>
+<p>For 1000 random points, non optimal path.</p>
+<img alt="_images/rrt_star_1000_unsuccessful.png" src="_images/rrt_star_1000_unsuccessful.png" />
+<p>For 1000 random points, better path.</p>
+<img alt="_images/rrt_star_1000_successful.png" src="_images/rrt_star_1000_successful.png" />
+<p>For 10000 random points, even better path.</p>
+<img alt="_images/rrt_star_10000_successful.png" src="_images/rrt_star_10000_successful.png" />
+<p>Note that it is difficult to check for the percentage of optimality due to the differential constraints of robot. However, visual inspection makes it clear that RRT* is better than RRT (Figures of RRT is not shown here).</p>
+</div>
+<div class="section" id="improvement-possibility">
+<h2>Improvement possibility<a class="headerlink" href="#improvement-possibility" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Currently, the goal is connected to the nearest neighbour if a connection is possible. The final maneuver to reach the goal at desired orientation could be implemented.</li>
+<li>Better visualization can be employed.</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Introduction</a><ul>
+<li><a class="reference internal" href="#reedsshepp-car">ReedsShepp Car</a></li>
+<li><a class="reference internal" href="#collision-detection">Collision Detection</a></li>
+<li><a class="reference internal" href="#strategies-used">Strategies used</a></li>
+<li><a class="reference internal" href="#sample-output">Sample Output</a></li>
+<li><a class="reference internal" href="#improvement-possibility">Improvement possibility</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to MotionPlanning&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="code.html"
+                        title="next chapter">Code Description</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/intro.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="code.html" title="Code Description"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to MotionPlanning’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MotionPlanning 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Bharathram Hariharan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

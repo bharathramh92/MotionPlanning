@@ -1,5 +1,5 @@
-Input JSON File Requirement
----------------------------
+Input/Output
+------------
 
 Following are the requirements for input environment json file.
 
@@ -24,8 +24,18 @@ Following are the requirements for input environment json file.
     - front_axle_back_axle_distance: Distance between the front axle and rear axle of the car.
     - dimension: Defines the car dimension when its position (center of rear axle) is super imposed on 0, 0 of euclidean plane. Provide the xy coordinates as a list similar to obstacles-->property-->vertices.
      
-Sample definition file is as follows.  
+Sample definition for input file is as follows.  
 
 .. include:: EnvRRTStarRS10.json
     :literal:
     
+The output generated will have all the details similar to that of input json and additionally the tree details and path details will be embedded. Extra attributes are as follows.
+
+- control: Control input
+- tree_lines: Tree as a list of line segments
+- path_lines: Final path as a list of line segments
+
+Following is a sample output file while running the RRT* for 10 iterations (To limit number of lines in this display).
+    
+.. include:: EnvRRTStarRS10_10_graph.json
+    :literal:  

@@ -4,7 +4,7 @@
   "initial_orientation": "45",
   "goal_state": [480, 50],
   "goal_orientation" : "90",
-  "random_points": 1000,
+  "random_points": 10,
   "theta_norm": [1, 1, 5],
   "tolerance": 1,
   "epsilon": 10,

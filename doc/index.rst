@@ -11,11 +11,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   intro
    code
-   graph
-   reeds_shepp_car
    EnvDefRequirement
-   env_conf
+   readme
 
 
 Indices and tables

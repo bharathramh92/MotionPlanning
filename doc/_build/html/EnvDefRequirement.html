@@ -1,0 +1,1237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Input/Output &mdash; MotionPlanning 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MotionPlanning 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="Instruction to Run the Code" href="readme.html" />
+    <link rel="prev" title="Code Description" href="code.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="readme.html" title="Instruction to Run the Code"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="code.html" title="Code Description"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MotionPlanning 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="input-output">
+<h1>Input/Output<a class="headerlink" href="#input-output" title="Permalink to this headline">¶</a></h1>
+<p>Following are the requirements for input environment json file.</p>
+<ul>
+<li><p class="first">resolution: Canvas dimension n. eg: n=500 &#8211;&gt; means 0-500, 0-500 along x-axis and y-axis respectively.</p>
+</li>
+<li><p class="first">initial_state: x, y of the rear axle center at initial state. eg: [45, 45].</p>
+</li>
+<li><p class="first">initial_orientation: Orientation angle in degree at initial state. eg: 45.</p>
+</li>
+<li><p class="first">goal_state: x, y of the rear axle center at goal state. eg: [480, 50].</p>
+</li>
+<li><p class="first">goal_orientation : Orientation angle in degree at goal state. eg: 90.</p>
+</li>
+<li><p class="first">random_points: Number of random point for the algorithm. eg: 5000.</p>
+</li>
+<li><p class="first">theta_norm: [x, y, theta] normalization vector for the distance function. Usually x and y be given equal weight and a constant for theta term. eg: [1, 1, 5].</p>
+</li>
+<li><p class="first">tolerance: Allowed error tolerance for distance function. eg: 1.</p>
+</li>
+<li><p class="first">geom_skip_factor: Used for drawing curves. This number defines the number of lines used while drawing curves. eg: value 1 would yield a better looking curve than value 5. However at a cost of memory.</p>
+</li>
+<li><p class="first">collision_check_skip_factor: Frequency of collision detection while performing the integration. eg: value 1 would yield higher number of collision detection, while value 4 would skip at an interval of 4 while doing the integration. The former one would be a 4 times computational intensive than the later one.</p>
+</li>
+<li><p class="first">total_steps_for_complete_integration: Defines the h value in the 4th order Runge-Kutta integration. Higher value yield better accuracy in integration and consequently better overall accuracy.</p>
+</li>
+<li><dl class="first docutils">
+<dt>obstacles: Defines a list of obstacles objects as polygon. Following is the method to define obstacles in the environment.</dt>
+<dd><ul class="first last">
+<li><p class="first">shape: Has to be &#8220;polygon&#8221; for all obstacles</p>
+</li>
+<li><dl class="first docutils">
+<dt>property: where the vertex data goes.</dt>
+<dd><ul class="first last simple">
+<li>vertices: define the x, y coordinate as a list. eg: [[400, 80], [400, 0], [100, 0], [100, 80]]</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>car: meta data of car robot</dt>
+<dd><ul class="first last simple">
+<li>linear_velocity: Velocity at which the car goes linearly. eg: 1.</li>
+<li>max_turning_angle: Maximum angle between the axis along the car length and the front wheel when it is turned at its maximum.</li>
+<li>front_axle_back_axle_distance: Distance between the front axle and rear axle of the car.</li>
+<li>dimension: Defines the car dimension when its position (center of rear axle) is super imposed on 0, 0 of euclidean plane. Provide the xy coordinates as a list similar to obstacles&#8211;&gt;property&#8211;&gt;vertices.</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Sample definition for input file is as follows.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s2">&quot;resolution&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+  <span class="s2">&quot;initial_state&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">45</span><span class="p">,</span> <span class="mi">45</span><span class="p">],</span>
+  <span class="s2">&quot;initial_orientation&quot;</span><span class="p">:</span> <span class="s2">&quot;45&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;goal_state&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">480</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span>
+  <span class="s2">&quot;goal_orientation&quot;</span> <span class="p">:</span> <span class="s2">&quot;90&quot;</span><span class="p">,</span>
+  <span class="s2">&quot;random_points&quot;</span><span class="p">:</span> <span class="mi">25000</span><span class="p">,</span>
+  <span class="s2">&quot;theta_norm&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+  <span class="s2">&quot;tolerance&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+  <span class="s2">&quot;geom_skip_factor&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+  <span class="s2">&quot;collision_check_skip_factor&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+  <span class="s2">&quot;total_steps_for_complete_integration&quot;</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span>
+  <span class="s2">&quot;obstacles&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+          <span class="p">[</span><span class="mi">400</span><span class="p">,</span> <span class="mi">80</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">400</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">80</span><span class="p">]</span>
+        <span class="p">]</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+          <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">300</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">300</span><span class="p">]</span>
+        <span class="p">]</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+          <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">500</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">350</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">350</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">500</span><span class="p">]</span>
+        <span class="p">]</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+          <span class="p">[</span><span class="mi">350</span><span class="p">,</span> <span class="mi">500</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">350</span><span class="p">,</span> <span class="mi">400</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">150</span><span class="p">,</span> <span class="mi">400</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">150</span><span class="p">,</span> <span class="mi">500</span><span class="p">]</span>
+        <span class="p">]</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+          <span class="p">[</span><span class="mi">350</span><span class="p">,</span> <span class="mi">300</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">350</span><span class="p">,</span> <span class="mi">110</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">150</span><span class="p">,</span> <span class="mi">110</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">150</span><span class="p">,</span> <span class="mi">300</span><span class="p">]</span>
+        <span class="p">]</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+          <span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">300</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">450</span><span class="p">,</span> <span class="mi">300</span><span class="p">],</span>
+          <span class="p">[</span><span class="mi">450</span><span class="p">,</span> <span class="mi">500</span><span class="p">]</span>
+        <span class="p">]</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+
+  <span class="p">],</span>
+  <span class="s2">&quot;car&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;linear_velocity&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;max_turning_angle&quot;</span><span class="p">:</span> <span class="mf">24.23</span><span class="p">,</span>
+    <span class="s2">&quot;front_axle_back_axle_distance&quot;</span><span class="p">:</span> <span class="mf">25.62</span><span class="p">,</span>
+    <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+          <span class="p">[</span>
+            <span class="mf">35.02</span><span class="p">,</span> <span class="mf">8.58</span>
+          <span class="p">],</span>
+          <span class="p">[</span>
+            <span class="mf">35.02</span><span class="p">,</span> <span class="o">-</span><span class="mf">8.58</span>
+          <span class="p">],</span>
+          <span class="p">[</span>
+            <span class="o">-</span><span class="mf">10.14</span><span class="p">,</span> <span class="o">-</span><span class="mf">8.58</span>
+          <span class="p">],</span>
+          <span class="p">[</span>
+            <span class="o">-</span><span class="mf">10.14</span><span class="p">,</span> <span class="mf">8.58</span>
+          <span class="p">]</span>
+        <span class="p">]</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The output generated will have all the details similar to that of input json and additionally the tree details and path details will be embedded. Extra attributes are as follows.</p>
+<ul class="simple">
+<li>control: Control input</li>
+<li>tree_lines: Tree as a list of line segments</li>
+<li>path_lines: Final path as a list of line segments</li>
+</ul>
+<p>Following is a sample output file while running the RRT* for 10 iterations (To limit number of lines in this display).</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;car&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;dimension&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">[</span>
+                        <span class="mf">35.02</span><span class="p">,</span>
+                        <span class="mf">8.58</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mf">35.02</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">8.58</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="o">-</span><span class="mf">10.14</span><span class="p">,</span>
+                        <span class="o">-</span><span class="mf">8.58</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="o">-</span><span class="mf">10.14</span><span class="p">,</span>
+                        <span class="mf">8.58</span>
+                    <span class="p">]</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;front_axle_back_axle_distance&quot;</span><span class="p">:</span> <span class="mf">25.62</span><span class="p">,</span>
+        <span class="s2">&quot;linear_velocity&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;max_turning_angle&quot;</span><span class="p">:</span> <span class="mi">50</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;collision_check_skip_factor&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s2">&quot;control&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+    <span class="s2">&quot;epsilon&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">&quot;geom_skip_factor&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s2">&quot;goal_orientation&quot;</span><span class="p">:</span> <span class="s2">&quot;90&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;goal_state&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="mi">480</span><span class="p">,</span>
+        <span class="mi">50</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;initial_orientation&quot;</span><span class="p">:</span> <span class="s2">&quot;45&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;initial_state&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="mi">45</span><span class="p">,</span>
+        <span class="mi">45</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;obstacles&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">[</span>
+                        <span class="mi">400</span><span class="p">,</span>
+                        <span class="mi">80</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">400</span><span class="p">,</span>
+                        <span class="mi">0</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">100</span><span class="p">,</span>
+                        <span class="mi">0</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">100</span><span class="p">,</span>
+                        <span class="mi">80</span>
+                    <span class="p">]</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">[</span>
+                        <span class="mi">80</span><span class="p">,</span>
+                        <span class="mi">300</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">80</span><span class="p">,</span>
+                        <span class="mi">200</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">0</span><span class="p">,</span>
+                        <span class="mi">200</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">0</span><span class="p">,</span>
+                        <span class="mi">300</span>
+                    <span class="p">]</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">[</span>
+                        <span class="mi">100</span><span class="p">,</span>
+                        <span class="mi">500</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">100</span><span class="p">,</span>
+                        <span class="mi">350</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">0</span><span class="p">,</span>
+                        <span class="mi">350</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">0</span><span class="p">,</span>
+                        <span class="mi">500</span>
+                    <span class="p">]</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">[</span>
+                        <span class="mi">350</span><span class="p">,</span>
+                        <span class="mi">500</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">350</span><span class="p">,</span>
+                        <span class="mi">400</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">150</span><span class="p">,</span>
+                        <span class="mi">400</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">150</span><span class="p">,</span>
+                        <span class="mi">500</span>
+                    <span class="p">]</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">[</span>
+                        <span class="mi">350</span><span class="p">,</span>
+                        <span class="mi">300</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">350</span><span class="p">,</span>
+                        <span class="mi">125</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">150</span><span class="p">,</span>
+                        <span class="mi">125</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">150</span><span class="p">,</span>
+                        <span class="mi">300</span>
+                    <span class="p">]</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;property&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;vertices&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">[</span>
+                        <span class="mi">500</span><span class="p">,</span>
+                        <span class="mi">500</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">500</span><span class="p">,</span>
+                        <span class="mi">300</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">450</span><span class="p">,</span>
+                        <span class="mi">300</span>
+                    <span class="p">],</span>
+                    <span class="p">[</span>
+                        <span class="mi">450</span><span class="p">,</span>
+                        <span class="mi">500</span>
+                    <span class="p">]</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="s2">&quot;polygon&quot;</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;path_lines&quot;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="s2">&quot;random_points&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">&quot;resolution&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+    <span class="s2">&quot;stats&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;best_z_near_count&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;re_wiring_count&quot;</span><span class="p">:</span> <span class="mi">0</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;theta_norm&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="mi">1</span><span class="p">,</span>
+        <span class="mi">1</span><span class="p">,</span>
+        <span class="mi">5</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;tolerance&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;total_steps_for_complete_integration&quot;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span>
+    <span class="s2">&quot;tree_lines&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">45.0</span><span class="p">,</span>
+                <span class="mf">45.0</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">46.68902138519762</span><span class="p">,</span>
+                <span class="mf">46.68902138519762</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">46.68902138519762</span><span class="p">,</span>
+                <span class="mf">46.68902138519762</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">48.37804277039524</span><span class="p">,</span>
+                <span class="mf">48.37804277039524</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">48.37804277039524</span><span class="p">,</span>
+                <span class="mf">48.37804277039524</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">50.06706415559286</span><span class="p">,</span>
+                <span class="mf">50.06706415559286</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">50.06706415559286</span><span class="p">,</span>
+                <span class="mf">50.06706415559286</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">51.75608554079048</span><span class="p">,</span>
+                <span class="mf">51.75608554079048</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">51.75608554079048</span><span class="p">,</span>
+                <span class="mf">51.75608554079048</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">53.4451069259881</span><span class="p">,</span>
+                <span class="mf">53.4451069259881</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">53.4451069259881</span><span class="p">,</span>
+                <span class="mf">53.4451069259881</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">55.13412831118572</span><span class="p">,</span>
+                <span class="mf">55.13412831118572</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">55.13412831118572</span><span class="p">,</span>
+                <span class="mf">55.13412831118572</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">56.82314969638334</span><span class="p">,</span>
+                <span class="mf">56.82314969638334</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">56.82314969638334</span><span class="p">,</span>
+                <span class="mf">56.82314969638334</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">58.51217108158096</span><span class="p">,</span>
+                <span class="mf">58.51217108158096</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">58.51217108158096</span><span class="p">,</span>
+                <span class="mf">58.51217108158096</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">60.20119246677858</span><span class="p">,</span>
+                <span class="mf">60.20119246677858</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">60.20119246677858</span><span class="p">,</span>
+                <span class="mf">60.20119246677858</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">61.8902138519762</span><span class="p">,</span>
+                <span class="mf">61.8902138519762</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">61.8902138519762</span><span class="p">,</span>
+                <span class="mf">61.8902138519762</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">63.57923523717382</span><span class="p">,</span>
+                <span class="mf">63.57923523717382</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">63.57923523717382</span><span class="p">,</span>
+                <span class="mf">63.57923523717382</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">65.26825662237144</span><span class="p">,</span>
+                <span class="mf">65.26825662237144</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">65.26825662237144</span><span class="p">,</span>
+                <span class="mf">65.26825662237144</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">66.95727800756906</span><span class="p">,</span>
+                <span class="mf">66.95727800756906</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">66.95727800756906</span><span class="p">,</span>
+                <span class="mf">66.95727800756906</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">68.64629939276668</span><span class="p">,</span>
+                <span class="mf">68.64629939276668</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">68.64629939276668</span><span class="p">,</span>
+                <span class="mf">68.64629939276668</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">70.3353207779643</span><span class="p">,</span>
+                <span class="mf">70.3353207779643</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">70.3353207779643</span><span class="p">,</span>
+                <span class="mf">70.3353207779643</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">72.02434216316192</span><span class="p">,</span>
+                <span class="mf">72.02434216316192</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">72.02434216316192</span><span class="p">,</span>
+                <span class="mf">72.02434216316192</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">73.71336354835954</span><span class="p">,</span>
+                <span class="mf">73.71336354835954</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">73.71336354835954</span><span class="p">,</span>
+                <span class="mf">73.71336354835954</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">75.40238493355716</span><span class="p">,</span>
+                <span class="mf">75.40238493355716</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">75.40238493355716</span><span class="p">,</span>
+                <span class="mf">75.40238493355716</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">77.09140631875478</span><span class="p">,</span>
+                <span class="mf">77.09140631875478</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">77.09140631875478</span><span class="p">,</span>
+                <span class="mf">77.09140631875478</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">78.7804277039524</span><span class="p">,</span>
+                <span class="mf">78.7804277039524</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">78.7804277039524</span><span class="p">,</span>
+                <span class="mf">78.7804277039524</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">80.46944908915002</span><span class="p">,</span>
+                <span class="mf">80.46944908915002</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">80.46944908915002</span><span class="p">,</span>
+                <span class="mf">80.46944908915002</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">82.15847047434764</span><span class="p">,</span>
+                <span class="mf">82.15847047434764</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">82.15847047434764</span><span class="p">,</span>
+                <span class="mf">82.15847047434764</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">83.84749185954526</span><span class="p">,</span>
+                <span class="mf">83.84749185954526</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">83.84749185954526</span><span class="p">,</span>
+                <span class="mf">83.84749185954526</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">85.53651324474288</span><span class="p">,</span>
+                <span class="mf">85.53651324474288</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">85.53651324474288</span><span class="p">,</span>
+                <span class="mf">85.53651324474288</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">87.2255346299405</span><span class="p">,</span>
+                <span class="mf">87.2255346299405</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">87.2255346299405</span><span class="p">,</span>
+                <span class="mf">87.2255346299405</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">88.91455601513812</span><span class="p">,</span>
+                <span class="mf">88.91455601513812</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">88.91455601513812</span><span class="p">,</span>
+                <span class="mf">88.91455601513812</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">90.60357740033574</span><span class="p">,</span>
+                <span class="mf">90.60357740033574</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">90.60357740033574</span><span class="p">,</span>
+                <span class="mf">90.60357740033574</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">92.29259878553336</span><span class="p">,</span>
+                <span class="mf">92.29259878553336</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">92.29259878553336</span><span class="p">,</span>
+                <span class="mf">92.29259878553336</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">93.98162017073098</span><span class="p">,</span>
+                <span class="mf">93.98162017073098</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">93.98162017073098</span><span class="p">,</span>
+                <span class="mf">93.98162017073098</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">95.6706415559286</span><span class="p">,</span>
+                <span class="mf">95.6706415559286</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">95.6706415559286</span><span class="p">,</span>
+                <span class="mf">95.6706415559286</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">97.35966294112622</span><span class="p">,</span>
+                <span class="mf">97.35966294112622</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">97.35966294112622</span><span class="p">,</span>
+                <span class="mf">97.35966294112622</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">99.04868432632384</span><span class="p">,</span>
+                <span class="mf">99.04868432632384</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">99.04868432632384</span><span class="p">,</span>
+                <span class="mf">99.04868432632384</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">100.73770571152146</span><span class="p">,</span>
+                <span class="mf">100.73770571152146</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">100.73770571152146</span><span class="p">,</span>
+                <span class="mf">100.73770571152146</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">102.42672709671908</span><span class="p">,</span>
+                <span class="mf">102.42672709671908</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">102.42672709671908</span><span class="p">,</span>
+                <span class="mf">102.42672709671908</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">104.1157484819167</span><span class="p">,</span>
+                <span class="mf">104.1157484819167</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">104.1157484819167</span><span class="p">,</span>
+                <span class="mf">104.1157484819167</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">105.80476986711432</span><span class="p">,</span>
+                <span class="mf">105.80476986711432</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">105.80476986711432</span><span class="p">,</span>
+                <span class="mf">105.80476986711432</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">107.49379125231194</span><span class="p">,</span>
+                <span class="mf">107.49379125231194</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">107.49379125231194</span><span class="p">,</span>
+                <span class="mf">107.49379125231194</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">109.18281263750956</span><span class="p">,</span>
+                <span class="mf">109.18281263750956</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">109.18281263750956</span><span class="p">,</span>
+                <span class="mf">109.18281263750956</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">110.87183402270718</span><span class="p">,</span>
+                <span class="mf">110.87183402270718</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">110.87183402270718</span><span class="p">,</span>
+                <span class="mf">110.87183402270718</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">112.5608554079048</span><span class="p">,</span>
+                <span class="mf">112.5608554079048</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">112.5608554079048</span><span class="p">,</span>
+                <span class="mf">112.5608554079048</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">114.24987679310242</span><span class="p">,</span>
+                <span class="mf">114.24987679310242</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">114.24987679310242</span><span class="p">,</span>
+                <span class="mf">114.24987679310242</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">115.93889817830004</span><span class="p">,</span>
+                <span class="mf">115.93889817830004</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">115.93889817830004</span><span class="p">,</span>
+                <span class="mf">115.93889817830004</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">117.62791956349766</span><span class="p">,</span>
+                <span class="mf">117.62791956349766</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">117.62791956349766</span><span class="p">,</span>
+                <span class="mf">117.62791956349766</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">119.31694094869528</span><span class="p">,</span>
+                <span class="mf">119.31694094869528</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">119.31694094869528</span><span class="p">,</span>
+                <span class="mf">119.31694094869528</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">117.72513079490345</span><span class="p">,</span>
+                <span class="mf">117.53765474779746</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">117.72513079490345</span><span class="p">,</span>
+                <span class="mf">117.53765474779746</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">116.34042845565972</span><span class="p">,</span>
+                <span class="mf">115.59283640612307</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">116.34042845565972</span><span class="p">,</span>
+                <span class="mf">115.59283640612307</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">115.17991144126633</span><span class="p">,</span>
+                <span class="mf">113.5064713350668</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">115.17991144126633</span><span class="p">,</span>
+                <span class="mf">113.5064713350668</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">114.25789238824274</span><span class="p">,</span>
+                <span class="mf">111.3042906394195</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">114.25789238824274</span><span class="p">,</span>
+                <span class="mf">111.3042906394195</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">113.58574254182383</span><span class="p">,</span>
+                <span class="mf">109.01345377609223</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">113.58574254182383</span><span class="p">,</span>
+                <span class="mf">109.01345377609223</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">113.1717515145867</span><span class="p">,</span>
+                <span class="mf">106.66221359699794</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">113.1717515145867</span><span class="p">,</span>
+                <span class="mf">106.66221359699794</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">113.02102505080018</span><span class="p">,</span>
+                <span class="mf">104.27956790711148</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">113.02102505080018</span><span class="p">,</span>
+                <span class="mf">104.27956790711148</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">113.13542205736807</span><span class="p">,</span>
+                <span class="mf">101.8949018350359</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">113.13542205736807</span><span class="p">,</span>
+                <span class="mf">101.8949018350359</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">113.51353167796204</span><span class="p">,</span>
+                <span class="mf">99.53762542671326</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">113.51353167796204</span><span class="p">,</span>
+                <span class="mf">99.53762542671326</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">114.15069069308855</span><span class="p">,</span>
+                <span class="mf">97.23681093183039</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">114.15069069308855</span><span class="p">,</span>
+                <span class="mf">97.23681093183039</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">115.03904103149534</span><span class="p">,</span>
+                <span class="mf">95.02083425625986</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">115.03904103149534</span><span class="p">,</span>
+                <span class="mf">95.02083425625986</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">116.1676266836299</span><span class="p">,</span>
+                <span class="mf">92.91702500249748</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">45.0</span><span class="p">,</span>
+                <span class="mf">45.0</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">46.68902138519762</span><span class="p">,</span>
+                <span class="mf">46.68902138519762</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">46.68902138519762</span><span class="p">,</span>
+                <span class="mf">46.68902138519762</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">48.37804277039524</span><span class="p">,</span>
+                <span class="mf">48.37804277039524</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">48.37804277039524</span><span class="p">,</span>
+                <span class="mf">48.37804277039524</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">50.06706415559286</span><span class="p">,</span>
+                <span class="mf">50.06706415559286</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">50.06706415559286</span><span class="p">,</span>
+                <span class="mf">50.06706415559286</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">51.75608554079048</span><span class="p">,</span>
+                <span class="mf">51.75608554079048</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">51.75608554079048</span><span class="p">,</span>
+                <span class="mf">51.75608554079048</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">53.4451069259881</span><span class="p">,</span>
+                <span class="mf">53.4451069259881</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">53.4451069259881</span><span class="p">,</span>
+                <span class="mf">53.4451069259881</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">55.13412831118572</span><span class="p">,</span>
+                <span class="mf">55.13412831118572</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">55.13412831118572</span><span class="p">,</span>
+                <span class="mf">55.13412831118572</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">56.82314969638334</span><span class="p">,</span>
+                <span class="mf">56.82314969638334</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">56.82314969638334</span><span class="p">,</span>
+                <span class="mf">56.82314969638334</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">58.51217108158096</span><span class="p">,</span>
+                <span class="mf">58.51217108158096</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">58.51217108158096</span><span class="p">,</span>
+                <span class="mf">58.51217108158096</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">60.20119246677858</span><span class="p">,</span>
+                <span class="mf">60.20119246677858</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">60.20119246677858</span><span class="p">,</span>
+                <span class="mf">60.20119246677858</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">61.8902138519762</span><span class="p">,</span>
+                <span class="mf">61.8902138519762</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">61.8902138519762</span><span class="p">,</span>
+                <span class="mf">61.8902138519762</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">63.57923523717382</span><span class="p">,</span>
+                <span class="mf">63.57923523717382</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">63.57923523717382</span><span class="p">,</span>
+                <span class="mf">63.57923523717382</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">65.26825662237144</span><span class="p">,</span>
+                <span class="mf">65.26825662237144</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">65.26825662237144</span><span class="p">,</span>
+                <span class="mf">65.26825662237144</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">66.95727800756906</span><span class="p">,</span>
+                <span class="mf">66.95727800756906</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">66.95727800756906</span><span class="p">,</span>
+                <span class="mf">66.95727800756906</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">68.64629939276668</span><span class="p">,</span>
+                <span class="mf">68.64629939276668</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">68.64629939276668</span><span class="p">,</span>
+                <span class="mf">68.64629939276668</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">70.3353207779643</span><span class="p">,</span>
+                <span class="mf">70.3353207779643</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">70.3353207779643</span><span class="p">,</span>
+                <span class="mf">70.3353207779643</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">72.02434216316192</span><span class="p">,</span>
+                <span class="mf">72.02434216316192</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">72.02434216316192</span><span class="p">,</span>
+                <span class="mf">72.02434216316192</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">73.71336354835954</span><span class="p">,</span>
+                <span class="mf">73.71336354835954</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">73.71336354835954</span><span class="p">,</span>
+                <span class="mf">73.71336354835954</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">75.40238493355716</span><span class="p">,</span>
+                <span class="mf">75.40238493355716</span>
+            <span class="p">]</span>
+        <span class="p">],</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">75.40238493355716</span><span class="p">,</span>
+                <span class="mf">75.40238493355716</span>
+            <span class="p">],</span>
+            <span class="p">[</span>
+                <span class="mf">76.41579776467573</span><span class="p">,</span>
+                <span class="mf">76.41579776467573</span>
+            <span class="p">]</span>
+        <span class="p">]</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="code.html"
+                        title="previous chapter">Code Description</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="readme.html"
+                        title="next chapter">Instruction to Run the Code</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/EnvDefRequirement.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="readme.html" title="Instruction to Run the Code"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="code.html" title="Code Description"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MotionPlanning 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Bharathram Hariharan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

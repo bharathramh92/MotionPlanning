@@ -314,7 +314,7 @@ def rrt_star_rs():
         data["path_lines"] = [list(list(ll) for ll in l) for l in path_lines]
         data["tree_lines"] = [list(list(ll) for ll in l) for l in tree_lines]
 
-        out_file.write(json.dumps(data))
+        out_file.write(json.dumps(data, indent=4, sort_keys=True))
 
     # draw the final output
     env.draw_env(tree_lines, path_lines)
