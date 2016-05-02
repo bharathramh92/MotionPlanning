@@ -6,6 +6,7 @@ class Vertex:
     def __init__(self, name, data):
         """
         Vertex class for graph data structure.
+
         :param name: Name of the vertex.
         :param data: Additional associated data.
         :return: None
@@ -23,8 +24,8 @@ class Vertex:
 
     def remove_edge(self, destination):
         """
-        Removes an edge. raise key error if the object is not found.
-        This O(1) operation since the self.adj_vertices is a dictionary.
+        Removes an edge. raise key error if the object is not found. This O(1) operation since the self.adj_vertices is a dictionary.
+
         :param destination: vertex object
         :return: None.
         """
@@ -41,6 +42,7 @@ class Edge:
     def __init__(self, source, destination, weight):
         """
         Edge class to store edge information.
+
         :param source: Source vertex object.
         :param destination: Destination vertex object.
         :param weight: Edge weight which is a number.
@@ -67,16 +69,16 @@ class Graph:
         """
         Graph data structure.
         self.vertex_map holds all the vertex mapped by its name. Hence the name needs to hashable.
-        :return:
+
         """
         self.vertex_map = dict()
 
     def add_vertex(self, node_name, data=None):
         """
         Add a new vertex.
+
         :param node_name: Name of the vertex.
         :param data: Associated data object.
-        :return:
         """
         if node_name not in self.vertex_map:
             self.vertex_map[node_name] = Vertex(node_name, data)
@@ -84,6 +86,7 @@ class Graph:
     def has_key(self, k):
         """
         To check is a vertex k exists of not.
+
         :param k: Vertex name.
         :return: boolean. True if present, False if not.
         """
@@ -93,16 +96,15 @@ class Graph:
                  ignore_previous_destination_data_validation=True, set_destination_parent=False):
         """
         Method to add a new edge.
+
         :param source: Source object.
         :param destination: Destination object.
         :param weight: Edge weight.
         :param source_data: Optional source_data if adding the source vertex for the first time.
         :param destination_data: Optional destination_data if adding the destination vertex for the first time.
         :param directed: True for undirected and False for directed.
-        :param ignore_previous_destination_data_validation: If set to True, raise ObjectAlreadyPresentException
-        if destination is present already. If set to False, the method ignore this check.
-        :param set_destination_parent: If directed it set to True and set_destination_parent set to True, then
-        each child will have it parent stored in variable pi in vertex object.
+        :param ignore_previous_destination_data_validation: If set to True, raise ObjectAlreadyPresentException if destination is present already. If set to False, the method ignore this check.
+        :param set_destination_parent: If directed it set to True and set_destination_parent set to True, then each child will have it parent stored in variable pi in vertex object.
         :return: None
         """
 
@@ -128,6 +130,7 @@ class Graph:
     def min_path(self, source, goal, return_as_list=False):
         """
         Dijkstra algorithm.
+
         :param source: Source name
         :param goal: Destination name
         :param return_as_list: Boolean variable which determines the return output.
@@ -160,6 +163,7 @@ class Graph:
     def traverse_to(self, source, destination):
         """
         To traverse from child to parent until the parent's pi variable is None.
+
         :param source: Source object name.
         :param destination: Destination object name.
         :return: A list of traversal path.

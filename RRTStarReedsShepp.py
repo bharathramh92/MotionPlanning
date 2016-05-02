@@ -12,6 +12,85 @@ from Config import Environment
 print_path = True
 
 
+def rand_state(env):
+    """
+    The limits of this random function are determined by env.resolution and angular range.
+
+    :return: nd.array(x, y, orientation)
+    """
+    x_r = random.randrange(0, env.resolution)
+    y_r = random.randrange(0, env.resolution)
+    o_r = random.uniform(-math.pi, math.pi)
+    return np.array([x_r, y_r, o_r])
+
+
+def update_tree(destination_data, steps_ut, tree_to_append, geom_skip_factor):
+    """
+    Helper class to keep track of lines to be drawn (tree_exploration/final_path lines). If the path is 's' or 'b' or 'f', then only the starting and end points of the line segment is tracked, otherwise for drawing the curve, the points are discretized based on geom_skip_factor value. This is to ensure memory optimization at the cost of final graph plot legibility.
+
+    :param destination_data: ReedsShepp car object.
+    :param steps_ut: nd.array Steps of xy coordinates
+    :param tree_to_append: The tree list reference onto which the path needs to updated
+    :param geom_skip_factor: Defines the precision of curves while drawing. Higher values results in course resolution.
+    :return: None.
+    """
+    if destination_data.action in ['s', 'b', 'f']:
+        tree_to_append.append([steps_ut[0][:2], steps_ut[-1][:2]])
+    else:
+        if geom_skip_factor > len(steps_ut):
+            skip_factor = 1
+        else:
+            skip_factor = geom_skip_factor
+        helper_list = [i for i in range(0, len(steps_ut), skip_factor)]
+        if helper_list[-1] != len(steps_ut)-1:
+            helper_list.append(len(steps_ut)-1)
+
+        for i in range(len(helper_list)-1):
+            step_index_1, step_index_2 = helper_list[i], helper_list[i+1]
+            xy1 = steps_ut[step_index_1][:2]
+            xy2 = steps_ut[step_index_2][:2]
+            tree_to_append.append((xy1, xy2))
+
+
+def add_graph(from_vertex, destination_data, steps_ag, cost, graph, tree_map, tree_lines, geom_skip_factor):
+    """
+    Helper method to add new edge or update them. This method also call update_tree.
+
+    :param from_vertex: Car object
+    :param destination_data: Car object
+    :param cost: cost of destination vertex
+    :param steps_ag: np.array of xyo
+    :param geom_skip_factor: Defines the precision of curves while drawing. Higher values results in course resolution.
+    :return: None
+    """
+    if from_vertex.xyo == destination_data.xyo:
+        pass
+    graph.add_edge(from_vertex.xyo, destination_data.xyo, cost, directed=True,
+                   destination_data=destination_data,
+                   set_destination_parent=True)
+    tree_map[(from_vertex.xyo, destination_data.xyo)] = steps_ag
+
+    update_tree(destination_data, steps_ag, tree_lines, geom_skip_factor)
+
+
+def vertices_within_box(reference_vertex, graph, tolerance, gamma, D):
+    """
+    To get only the vertices within the reference vertex. Radius is defined by balanced box decomposition. For more information, refer http://www.cs.berkeley.edu/~pabbeel/cs287-fa15/optreadings/rrtstar.pdf.
+    :param reference_vertex: Vertex object
+    :return: List of nearest vertices within the computed radius.
+    """
+    len_v = len(graph.vertex_map)
+    η = tolerance
+    radius = max(gamma*((math.log(len_v, 2)/len_v)**(1/D)), η)
+    out = []
+    for v in graph.vertex_map.values():
+        if v.data.xyo == reference_vertex.xyo:
+            continue
+        if np.linalg.norm(v.data.numpy_vector - reference_vertex.numpy_vector) < radius:
+            out.append(v)
+    return radius, out
+
+
 def rrt_star_rs():
     env = Environment(sys.argv[1])
 
@@ -52,6 +131,7 @@ def rrt_star_rs():
     def distance_fn(val, compare_with):
         """
         Weighted knn. val and compare_with should be of the form [x, y, orientation]
+
         :param val: First vector
         :param compare_with: Second vector
         :return: Weighted magnitude
@@ -68,90 +148,19 @@ def rrt_star_rs():
             val[2] += math.pi
         return np.linalg.norm((val-compare_with)*theta_norm)
 
-    def vertices_within_box(reference_vertex):
-        """
-        To get only the vertices within the reference vertex. Radius is defined by balanced box decomposition.
-        For more information, refer http://www.cs.berkeley.edu/~pabbeel/cs287-fa15/optreadings/rrtstar.pdf.
-        :param reference_vertex: Vertex object
-        :return: List of nearest vertices within the computed radius.
-        """
-        len_v = len(graph.vertex_map)
-        η = data["tolerance"]
-        radius = max(gamma*((math.log(len_v, 2)/len_v)**(1/D)), η)
-        out = []
-        for v in graph.vertex_map.values():
-            if v.data.xyo == reference_vertex.xyo:
-                continue
-            if np.linalg.norm(v.data.numpy_vector - reference_vertex.numpy_vector) < radius:
-                out.append(v)
-        return radius, out
-
     def env_check(xyo):
         """
-        To perform collision detection, checking if the car is within the boundary and to make the point is not added
-        already in graph vertex to make sure the behaviour is predictable.
+        To perform collision detection, checking if the car is within the boundary and to make the point is not added already in graph vertex to make sure the behaviour is predictable.
+
         :param xyo:
         :return:
         """
         return (not env.is_car_inside(xyo)) and env.is_car_within_boundary(xyo) and xyo not in graph.vertex_map
 
-    def update_tree(destination_data, steps_ut, tree_to_append):
-        """
-        Helper class to keep track of lines to be drawn (tree_exploration/final_path lines).
-        If the path is 's' or 'b' or 'f', then only the starting and end points of the line segment is tracked,
-        otherwise for drawing the curve, the points are discretized based on geom_skip_factor value. This is to
-        ensure memory optimization at the cost of final graph plot legibility.
-        :param destination_data: ReedsShepp car object.
-        :param steps_ut: nd.array Steps of xy coordinates
-        :param tree_to_append: The tree list reference onto which the path needs to updated
-        :return: None.
-        """
-        if destination_data.action in ['s', 'b', 'f']:
-            tree_to_append.append([steps_ut[0][:2], steps_ut[-1][:2]])
-        else:
-            if geom_skip_factor > len(steps_ut):
-                skip_factor = 1
-            else:
-                skip_factor = geom_skip_factor
-            helper_list = [i for i in range(0, len(steps_ut), skip_factor)]
-            if helper_list[-1] != len(steps_ut)-1:
-                helper_list.append(len(steps_ut)-1)
-
-            for i in range(len(helper_list)-1):
-                step_index_1, step_index_2 = helper_list[i], helper_list[i+1]
-                xy1 = steps_ut[step_index_1][:2]
-                xy2 = steps_ut[step_index_2][:2]
-                tree_to_append.append((xy1, xy2))
-
-    def add_graph(from_vertex, destination_data, steps_ag, cost):
-        """
-        Helper method to add new edge or update them. This method also call update_tree.
-        :param from_vertex: Car object
-        :param destination_data: Car object
-        :param cost: cost of destination vertex
-        :param steps_ag: np.array of xyo
-        :return: None
-        """
-        if from_vertex.xyo == destination_data.xyo:
-            pass
-        graph.add_edge(from_vertex.xyo, destination_data.xyo, cost, directed=True,
-                       destination_data=destination_data,
-                       set_destination_parent=True)
-        tree_map[(from_vertex.xyo, destination_data.xyo)] = steps_ag
-
-        update_tree(destination_data, steps_ag, tree_lines)
-
-    def rand_state():
-        """
-        The limits of this random function are determined by env.resolution and angular range.
-        :return: nd.array(x, y, orientation)
-        """
-        x_r = random.randrange(0, env.resolution)
-        y_r = random.randrange(0, env.resolution)
-        o_r = random.uniform(-math.pi, math.pi)
-        return np.array([x_r, y_r, o_r])
-
     def generate_rrt():
+        """
+        Driver method for running RRTStar algorithm.
+        """
         x_initial = ReedsShepp(tuple(env.initial_state), env.initial_orientation, 0, data,
                                env_check=env_check, action="i")     # starting vertex
         graph.add_vertex(x_initial.xyo, x_initial)
@@ -167,7 +176,7 @@ def rrt_star_rs():
             if rp_count == rand_points-1:           # at the end, we adding goal as the random sample.
                 x_rand = goal
             else:
-                x_rand = rand_state()
+                x_rand = rand_state(env)
 
             # Take the nearest vertex.
             z_nearest = min(graph.vertex_map.keys(), key=lambda val: distance_fn(val, x_rand))
@@ -187,7 +196,7 @@ def rrt_star_rs():
             z_new = ReedsShepp(z_new_xyo[:2], z_new_xyo[2], 0, env_check=env_check, action=action)
             # radius - radius of the bounding circle
             # z_nearby - nearby vertices from z_new within a radius of "radius"
-            radius, z_nearby = vertices_within_box(z_new)
+            radius, z_nearby = vertices_within_box(z_new, graph, tolerance, gamma, D)
             # print(radius, len(z_nearby))
 
             if z_nearest.data.xyo == z_new.xyo:
@@ -219,7 +228,7 @@ def rrt_star_rs():
                     z_min = z_near
                     z_min_steps = steps
 
-            add_graph(z_min.data, z_new, z_min_steps, edge_cost)
+            add_graph(z_min.data, z_new, z_min_steps, edge_cost, graph, tree_map, tree_lines, geom_skip_factor)
 
             # Re-Wiring step
             for z_near in z_nearby:
@@ -237,7 +246,7 @@ def rrt_star_rs():
                     z_parent = z_near.pi
                     z_parent.remove_edge(z_near)
                     # z_near.cost = z_new.cost + min_value
-                    add_graph(z_new, z_near.data, steps, min_value)
+                    add_graph(z_new, z_near.data, steps, min_value, graph, tree_map, tree_lines, geom_skip_factor)
                     z_near.data.action = "%s,%d" % (min_route, min_t)
 
                     def dfs_cost_update(vertex, cost):
@@ -278,7 +287,7 @@ def rrt_star_rs():
             traversal_path = graph.traverse_to(x_initial.xyo, goal.xyo)
             for i in range(0, len(traversal_path) - 1):
                 lines = tree_map[(traversal_path[i].data.xyo, traversal_path[i+1].data.xyo)]
-                update_tree(traversal_path[i].data, lines, path_lines)
+                update_tree(traversal_path[i].data, lines, path_lines, geom_skip_factor)
 
             traversal_path.reverse()
             for tp in traversal_path:

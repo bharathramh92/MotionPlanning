@@ -18,6 +18,7 @@ class Environment:
     def __init__(self, input_file):
         """
         Environment helper class for collision detection and matplotlib plotting.
+
         :param input_file: File name on input json.
         :return: None
         """
@@ -37,6 +38,7 @@ class Environment:
     def get_free_area(self):
         """
         To get the total free area.
+
         :return: Total area - obstacle area.
         """
         free_area = 0
@@ -47,6 +49,7 @@ class Environment:
     def read_env_from_file(self, input_file):
         """
         Read json input and sets the object variables.
+
         :param input_file: Input json file name.
         :return: None
         """
@@ -105,18 +108,13 @@ class Environment:
 
     def _change_axis(self, theta, xy):
         """
-        This is a rotation technique. The car object is defined in environment as if its center
-        (center of rear axle) is super imposed in the origin of euclidean plane. To get the new position, i.e,
-        the coordinates of its vertices the position of the car is at xy and rotated to theta radians,
-        first we need to rotate the car theta radians from origin position, then add the translated xy
-        coordinates to all the vertices.
+        This is a rotation technique. The car object is defined in environment as if its center (center of rear axle) is super imposed in the origin of euclidean plane. To get the new position, i.e, the coordinates of its vertices the position of the car is at xy and rotated to theta radians, first we need to rotate the car theta radians from origin position, then add the translated xy coordinates to all the vertices.
 
-        rot(theta) = [[cos(theta), -sin(theta)],
-                        [sin(theta), cos(theta)]]
-        point = [[vertex_point[0]],
-                [vertex_point[1]]]
-        coordinate after rotation, CR = rot(theta) x point
-        after translation, AT = CR + xy
+        - rot(theta) = [[cos(theta), -sin(theta)], [sin(theta), cos(theta)]]
+        - point = [[vertex_point[0]], [vertex_point[1]]]
+        - coordinate after rotation, CR = rot(theta) x point
+        - after translation, AT = CR + xy
+
         :param theta: Orientation of car w.r.t x-axis.
         :param xy: Center of rear axle after translation.
         :return: nd.array of rotated and translated vertices.
@@ -135,6 +133,7 @@ class Environment:
     def is_within_boundary(self, xy):
         """
         Check if a point is inside boundary.
+
         :param xy: Position of the point
         :return: Boolean. True if point is within boundary and False if point is outside the boundary.
         """
@@ -146,6 +145,7 @@ class Environment:
     def is_car_within_boundary(self, xyo):
         """
         Check if a car is inside boundary.
+
         :param xyo: Position of the center of rear axle.
         :return: Boolean. True if car is within boundary and False if car is outside the boundary.
         """
@@ -163,6 +163,7 @@ class Environment:
     def is_car_inside(self, xyo):
         """
         Check if the car is intersecting any obstacles.
+
         :param xyo: Position of the center of rear axle.
         :return: Boolean. True if car intersects any obstacle and False if car is not the boundary.
         """
@@ -194,9 +195,8 @@ class Environment:
 
     def draw_env(self, lines, path):
         """
-        Method to draw an arrow in the environment.
-        Format for lines and path is [[[x1, y1], [x2, y2]], [[x3, y3], [x4, y4]]], where
-        [[x1, y1], [x2, y2]] is one line segment.
+        Method to draw an arrow in the environment. Format for lines and path is [[[x1, y1], [x2, y2]], [[x3, y3], [x4, y4]]], where [[x1, y1], [x2, y2]] is one line segment.
+
         :param lines: List of blue lines.
         :param path: List of black lines.
         :return:

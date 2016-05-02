@@ -5,18 +5,18 @@ import matplotlib.pyplot as plt
 
 class DataNotDefinedException(Exception):
     """
-    static variable "data" a dictionary needs to be defined before using this class.
-    data should have the following attributes.
-    data['l'] --> distance between front_axle and rear axle of the car
-    data['Us'] --> linear_velocity of the car
-    data['Uphi'] --> maximum turning angle of the car (same of all turns)
-    data["ro_min"] --> minimum turning radius, given by abs(data["l"]/math.tan(data["Uphi"]))
-    data["delta_t"] --> h value for 4th order runge kutta integration
-    data["epsilon"] --> step size for integration. Required for RRT and not for RRTStar
-    data["time_to_cover_entire_perimeter"] --> time to cover entire perimeter for the car, given by  2*math.pi*data["ro_min"]/data["Us"]. i.e, distance/velocity.
-    data["collision_check_skip_factor"] --> how often the collision check should be skipped while integrating.
-    data["tolerance"] --> maximum tolerance between any match in configuration
-    data["theta_norm"] --> [x, y, theta] normalization vector for the distance function.
+    static variable "data" a dictionary needs to be defined before using this class. "data" should have the following attributes.
+
+    - data['l'] : distance between front_axle and rear axle of the car
+    - data['Us'] : linear_velocity of the car
+    - data['Uphi'] : maximum turning angle of the car (same of all turns)
+    - data["ro_min"] : minimum turning radius, given by abs(data["l"]/math.tan(data["Uphi"]))
+    - data["delta_t"] : h value for 4th order runge kutta integration
+    - data["epsilon"] : step size for integration. Required for RRT and not for RRTStar
+    - data["time_to_cover_entire_perimeter"] : time to cover entire perimeter for the car, given by  2*math.pi*data["ro_min"]/data["Us"]. i.e, distance/velocity.
+    - data["collision_check_skip_factor"] : how often the collision check should be skipped while integrating.
+    - data["tolerance"] : maximum tolerance between any match in configuration
+    - data["theta_norm"] : [x, y, theta] normalization vector for the distance function.
     """
     pass
 
@@ -30,16 +30,13 @@ class ReedsShepp:
         """
         Car class to define ReedsShepp car object. Any mentioning of configuration mean [x, y, orientation] data
         structure.
+
         :param xy: xy coordinate tuple of the rear axle center
         :param orientation: orientation angle of the car w.r.t to x-axis
         :param cost: cost to reach the current configuration from initial configuration
-        :param variable_time_integration: True if the integration needs to be performed over a variable time, and
-        is used for RRT*. False if the integration step size is fixed, and is used for RRT.
-        :param env_check: Function to check if the given configuration is intersecting an obstacle of not. Function
-         should accept an argument of tuple/list/nd.array which states and center point of rear axle and orientation.
-         (x, y, orientation) is the format
-        :param action: A String, which states on what action ("straight", "left", "right", "reverse", "left_reverse", "right_reverse")
-        the current object is derived from the parent and the time for which the control was given.
+        :param variable_time_integration: True if the integration needs to be performed over a variable time, and is used for RRT*. False if the integration step size is fixed, and is used for RRT.
+        :param env_check: Function to check if the given configuration is intersecting an obstacle of not. Function should accept an argument of tuple/list/nd.array which states and center point of rear axle and orientation. (x, y, orientation) is the format.
+        :param action: A String, which states on what action ("straight", "left", "right", "reverse", "left_reverse", "right_reverse") the current object is derived from the parent and the time for which the control was given.
         :return: None
         """
         if ReedsShepp.data is None:
@@ -74,6 +71,7 @@ class ReedsShepp:
         """
         Converting an angle which is not bounded by any limit to an angle in -math.pi to math.pi range.
         eg: math.radians(182) = math.radians(-172)
+
         :param angle: in radians
         :return: Angle in -math.pi to math.pi
         """
@@ -81,9 +79,8 @@ class ReedsShepp:
 
     def _fn(self, t, data, us_fn, uphi_fn):
         """
-        Function that defines the differential constraint for ReedsShepp car.
-        differential constraints for ReedsShepp Car is as mentioned in http://planning.cs.uiuc.edu/ch13.pdf
-        pg. 6 of the pdf
+        Function that defines the differential constraint for ReedsShepp car.Differential constraints for ReedsShepp Car is as mentioned in http://planning.cs.uiuc.edu/ch13.pdf pg. 6 of the pdf.
+
         :param t: time. Here this doesn't matter as the differential equation doesn't have a variable t.
         :param data: (x, y, orientation) tuple or list or nd.array.
         :param us_fn: Linear velocity in m/s or cm/s.
@@ -97,12 +94,12 @@ class ReedsShepp:
 
     def _runge_kutta_helper(self, ur_h, uphi_h, epsilon):
         """
-        Heler function for runge-kutta 4th order integration.
+        Helper function for runge-kutta 4th order integration.
+
         :param ur_h: Linear velocity control input. A number.
         :param uphi_h: Turning angle control input. A number.
         :param epsilon: Step size of integration.
-        :return: None if no possible steps, else a numpy array of numpy array which gives the information of on
-        x, y, orientation upon each integrating steps (h).
+        :return: None if no possible steps, else a numpy array of numpy array which gives the information of on x, y, orientation upon each integrating steps (h).
         """
         h = ReedsShepp.data["delta_t"]
         initial = np.array([self.xy[0], self.xy[1], self.orientation])
@@ -138,32 +135,28 @@ class ReedsShepp:
 
     def _runge_kutta_fixed(self, us_rk, uphi_rk):
         """
-        4th order runge-kutta integration method with fixed step size given in data["epsilon"]. Note that the
-         integration breaks once the car hits an obstacle. Return next state after integrating over the step size.
+        4th order runge-kutta integration method with fixed step size given in data["epsilon"]. Note that the integration breaks once the car hits an obstacle. Return next state after integrating over the step size.
+
         :param us_rk: Linear velocity control input. A number.
         :param uphi_rk: Turning angle control input. A number.
-        :return: None if no possible steps, else a numpy array of numpy array which gives the information of on
-        x, y, orientation upon each integrating steps (h).
+        :return: None if no possible steps, else a numpy array of numpy array which gives the information of on x, y, orientation upon each integrating steps (h).
         """
         return self._runge_kutta_helper(us_rk, uphi_rk, self.data["epsilon"])
 
     def _runge_kutta_variable_step(self, Us_rk, Uphi_rk):
         """
-        4th order runge-kutta integration method step size limited to data["time_to_cover_entire_perimeter"].
-         Note that the integration breaks once the car hits an obstacle.
-          Return next state after integrating over the step size.
+        4th order runge-kutta integration method step size limited to data["time_to_cover_entire_perimeter"]. Note that the integration breaks once the car hits an obstacle. Return next state after integrating over the step size.
+
         :param us_rk: Linear velocity control input. A number.
         :param uphi_rk: Turning angle control input. A number.
-        :return: None if no possible steps, else a numpy array of numpy array which gives the information of on
-        x, y, orientation upon each integrating steps (h).
+        :return: None if no possible steps, else a numpy array of numpy array which gives the information of on x, y, orientation upon each integrating steps (h).
         """
         return self._runge_kutta_helper(Us_rk, Uphi_rk, self.data["time_to_cover_entire_perimeter"])
 
     def _generate_steer_possibilities_vr(self):
         """
-        Function to generate all possible 6 steer methods whose integration time is limited to
-        data["time_to_cover_entire_perimeter"] for the car at this current configuration. This function
-        updates self.steer_possibilities_vr dictionary.
+        Function to generate all possible 6 steer methods whose integration time is limited to data["time_to_cover_entire_perimeter"] for the car at this current configuration. This function updates self.steer_possibilities_vr dictionary.
+
         :return: None
         """
         st = self._runge_kutta_variable_step(ReedsShepp.data["Us"], 0)
@@ -190,9 +183,8 @@ class ReedsShepp:
 
     def _generate_steer_possibilities_fixed(self):
         """
-        Function to generate all possible 6 steer methods whose integration time is limited to
-        data["epsilon"] for the car at this current configuration. This function
-        updates self.steer_possibilities_fixed dictionary.
+        Function to generate all possible 6 steer methods whose integration time is limited to data["epsilon"] for the car at this current configuration. This function updates self.steer_possibilities_fixed dictionary.
+
         :return: None
         """
         st = self._runge_kutta_fixed(ReedsShepp.data["Us"], 0)
@@ -219,16 +211,13 @@ class ReedsShepp:
 
     def steer(self, z_end, distance_fn, tolerance_steer, within_tolerance=False):
         """
-        Obtains the best possible steer method to reach z_end configuration from the current configuration.
-        This method takes the best of best configuration of all possible steer types ("straight", "left", etc).
-        Note that this method considers variable integration. Raises exception if self.variable_time_integration
-        is False.
+        Obtains the best possible steer method to reach z_end configuration from the current configuration. This method takes the best of best configuration of all possible steer types ("straight", "left", etc). Note that this method considers variable integration. Raises exception if self.variable_time_integration is False.
+
         :type tolerance_steer: maximum tolerence for the distance_fn.
         :param z_end: The destination configuration.
         :param distance_fn: Distance function for determining the closest neighbour.
-        :param within_tolerance: boolean. True if the destination needs to be reached within the tolerant limit,
-        and False if the car needs to reach z_end as close as possible.
-        :return:
+        :param within_tolerance: boolean. True if the destination needs to be reached within the tolerant limit, and False if the car needs to reach z_end as close as possible.
+        :return: None if no possible motions else, a tuple of following format. (min_steer_name, (min_t, min_value, min_index, steps)), where min_steer_name is the name of the action, min_t is the integration time, min_value is the value from distance fuction between z_end and config at min_t and steps is the nd.array for all the intermediate configurations.
         """
         if not self.variable_time_integration:
             raise EnvironmentError
@@ -267,13 +256,11 @@ class ReedsShepp:
 
     def get_next_best_state(self, nearest_conf, distance_function):
         """
-         Obtains the best possible steer method to reach nearest_conf configuration  as close as possible from the
-         current configuration. Note that this method considers fixed integration. Raises exception if self.variable_time_integration
-        is True.
+         Obtains the best possible steer method to reach nearest_conf configuration  as close as possible from the current configuration. Note that this method considers fixed integration. Raises exception if self.variable_time_integration is True.
+
         :param nearest_conf: The destination configuration.
         :param distance_function: Distance function for determining the closest neighbour.
-        :return: None if no possible motions else, a tuple with control name at first index (0) and np.array of
-        next possible configurations at second index (1).
+        :return: None if no possible motions else, a tuple with control name at first index (0) and np.array of next possible configurations at second index (1).
         """
         if self.variable_time_integration:
             raise EnvironmentError

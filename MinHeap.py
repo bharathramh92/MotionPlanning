@@ -1,12 +1,11 @@
 class MinHeap:
 
-    """This class is for Object and key for which the priority has to built should be passed while initializing.
-    Build heap method will be called once the object is instantiated.
-    updateData will also call the build heap method with the new data."""
+    """This class is for Object and key for which the priority has to built should be passed while initializing. Build heap method will be called once the object is instantiated. updateData will also call the build heap method with the new data."""
 
     def __init__(self, data, key):
         """
         MinHeap data structure.
+
         :param data: iteratable data
         :param key: function to point the comparable variable.
         :return: None.
@@ -19,6 +18,7 @@ class MinHeap:
     def updateData(self, data, key):
         """
         This method populates data and updates key if a heap object has to be reused.
+
         :param data: iteratable data
         :param key: function to point the comparable variable.
         :return: None
@@ -38,7 +38,8 @@ class MinHeap:
 
     def min_heapify(self, i):
         """
-        Performs min heapify at index i
+        Performs min heapify at index i.
+
         :param i: index
         :return: None
         """
@@ -79,6 +80,7 @@ class MinHeap:
     def build_heap(self):                                                       # O(n)
         """
         Builds heap from self.data.
+
         :return: None
         """
         self.aHeapsize = len(self.data)
@@ -91,6 +93,7 @@ class MinHeap:
     def extract_min(self):                                                       # O(log(n))
         """
         To extract min element from the heap.
+
         :return: Min element object
         """
         if self.aHeapsize < 1:
@@ -106,9 +109,10 @@ class MinHeap:
     def decrease_key(self, node, newValue, setKeyFunction):
         """
         Decrease the key by bubble up operation.
+
         :param node: The object whose priority has to decreased
         :param newValue: The new value of the Key in the object
-        :setKeyFunction sk: Key setter function in object
+        :param setKeyFunction: Key setter function in object
         :return: Boolean
         """
         if newValue > self.key(node):          # new value should be smaller than the old one
