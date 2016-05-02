@@ -4,12 +4,13 @@
   "initial_orientation": "45",
   "goal_state": [480, 50],
   "goal_orientation" : "90",
-  "random_points": 25000,
+  "random_points": 1000,
   "theta_norm": [1, 1, 5],
   "tolerance": 1,
+  "epsilon": 10,
   "geom_skip_factor": 5,
   "collision_check_skip_factor": 4,
-  "total_steps_for_complete_integration": 40,
+  "total_steps_for_complete_integration": 45,
   "obstacles": [
     {
       "shape": "polygon",
@@ -60,8 +61,8 @@
       "property": {
         "vertices": [
           [350, 300],
-          [350, 110],
-          [150, 110],
+          [350, 125],
+          [150, 125],
           [150, 300]
         ]
       }
@@ -81,7 +82,7 @@
   ],
   "car": {
     "linear_velocity": 1,
-    "max_turning_angle": 24.23,
+    "max_turning_angle": 50,
     "front_axle_back_axle_distance": 25.62,
     "dimension": {
       "shape": "polygon",
