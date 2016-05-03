@@ -75,7 +75,7 @@
 <dd><ul class="first last simple">
 <li><span class="math">\(U_s\)</span>: Linear velocity</li>
 <li><span class="math">\(U_\phi\)</span>: Maximum possible Angle between front wheel and axis along the car length.</li>
-<li>L: Linear velocity</li>
+<li>L: Distance between front axle and rear axle when the <span class="math">\(U_\phi\)</span> is 0.</li>
 </ul>
 </dd>
 </dl>
@@ -90,7 +90,7 @@
 <li>The format of robot/car and transforming them to get a set of vertices for a new config is explained in <a class="reference internal" href="code.html#Config.Environment._change_axis" title="Config.Environment._change_axis"><code class="xref py py-meth docutils literal"><span class="pre">Config.Environment._change_axis()</span></code></a>.</li>
 <li>To optimize computation while integrating, each object generates all of its possible motions to by integration and caches the result. Upon requesting the steer method, the minimum is computed from the pre-cached data.</li>
 <li>Static variable called data is used in ReedsShepp class since the car data/specifications won&#8217;t change over the course of running a program.</li>
-<li>All the angles are taken in the range [-<span class="math">\(\pi\)</span>  <span class="math">\(\pi\)</span>]. While storing and angle, it is rotated based on <a class="reference internal" href="code.html#ReedsSheppCar.ReedsShepp._roll_over" title="ReedsSheppCar.ReedsShepp._roll_over"><code class="xref py py-meth docutils literal"><span class="pre">ReedsSheppCar.ReedsShepp._roll_over()</span></code></a> method. Also in distance function, to make sure same behaviour while comparing a positive angle and negative angle, all angles are converted in [0  2:math:<cite>pi</cite>].</li>
+<li>All the angles are taken in the range [-<span class="math">\(\pi\)</span>  <span class="math">\(\pi\)</span>]. While storing and angle, it is rotated based on <a class="reference internal" href="code.html#ReedsSheppCar.ReedsShepp._roll_over" title="ReedsSheppCar.ReedsShepp._roll_over"><code class="xref py py-meth docutils literal"><span class="pre">ReedsSheppCar.ReedsShepp._roll_over()</span></code></a> method. Also in distance function, to make sure same behaviour while comparing a positive angle and negative angle, all angles are converted in [0  <span class="math">\(2\pi\)</span>].</li>
 <li>If the path is &#8216;s&#8217; or &#8216;b&#8217; or &#8216;f&#8217;, then only the starting and end points of the line segment is tracked, otherwise for drawing the curve, the points are discretized based on geom_skip_factor value. This is to ensure memory optimization at the cost of final graph plot legibility.</li>
 <li>The output is stored as JSON file which can be read quickly and be plotted.</li>
 <li>Tolerance concept and weighted knn ensures a better convergence though at a cost of error.</li>

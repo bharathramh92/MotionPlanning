@@ -26,7 +26,7 @@ Following are differential constraints for our non-holonomic car.
 Where,
  - :math:`U_s`: Linear velocity
  - :math:`U_\phi`: Maximum possible Angle between front wheel and axis along the car length.
- - L: Linear velocity
+ - L: Distance between front axle and rear axle when the :math:`U_\phi` is 0.
 
 Collision Detection
 ===================
@@ -40,7 +40,7 @@ Strategies used
 - The format of robot/car and transforming them to get a set of vertices for a new config is explained in :py:meth:`Config.Environment._change_axis`.
 - To optimize computation while integrating, each object generates all of its possible motions to by integration and caches the result. Upon requesting the steer method, the minimum is computed from the pre-cached data.
 - Static variable called data is used in ReedsShepp class since the car data/specifications won't change over the course of running a program.
-- All the angles are taken in the range [-:math:`\pi`  :math:`\pi`]. While storing and angle, it is rotated based on :py:meth:`ReedsSheppCar.ReedsShepp._roll_over` method. Also in distance function, to make sure same behaviour while comparing a positive angle and negative angle, all angles are converted in [0  2:math:`\pi`].
+- All the angles are taken in the range [-:math:`\pi`  :math:`\pi`]. While storing and angle, it is rotated based on :py:meth:`ReedsSheppCar.ReedsShepp._roll_over` method. Also in distance function, to make sure same behaviour while comparing a positive angle and negative angle, all angles are converted in [0  :math:`2\pi`].
 - If the path is 's' or 'b' or 'f', then only the starting and end points of the line segment is tracked, otherwise for drawing the curve, the points are discretized based on geom_skip_factor value. This is to ensure memory optimization at the cost of final graph plot legibility.
 - The output is stored as JSON file which can be read quickly and be plotted.
 - Tolerance concept and weighted knn ensures a better convergence though at a cost of error.
